@@ -2,6 +2,11 @@ const { connection } = require("../database/connection")
 const {DataTypes} = require("sequelize")
 
 const User = connection.define('user', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
     name: {
         type: DataTypes.STRING
     },

@@ -6,6 +6,7 @@ const { hasPermission } = require('../middleware/hasPermission');
 router.get('/', userController.findAll);
 router.get('/:id', userController.findById);
 router.post('/', hasPermission(['criar_usuario']), userController.createNewUser);
+// router.post('/', userController.createNewUser);
 router.put('/:id', userController.updateUser);
 router.delete('/:id', userController.deleteUser);
 

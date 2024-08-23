@@ -34,10 +34,16 @@ class RBAC {
     }
 
     async listRoles(request, response) {
-        const data = await Role.findAll()
-        const total = await Role.count()
+        try {
 
-        return response.status(200).send({ records: data, total })
+            const data = await Role.findAll({include: [{model: Permission}]})
+            const total = await Role.count()
+            
+            return response.status(200).send({ records: data, total })
+        } catch (error){
+            console.log(error.message)
+            return response.status(500).send("Algo deu errado!")
+        }
     }
 
     async createOneRole(request, response) {

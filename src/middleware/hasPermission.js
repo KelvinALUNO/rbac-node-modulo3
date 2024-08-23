@@ -6,22 +6,21 @@ function hasPermission(permissions){
     return async (request, response, next) => {
 
          // Verificar se o cabeçalho de autorização está presente
-         console.log(request.headers.authorization)
          if (!request.headers.authorization) {
             return response.status(401).send({ message: "Token não fornecido" });
         }
 
         const token = request.headers.authorization
-
         // Verificar se o token está presente
         if (!token) {
             return response.status(401).send({ message: "Token não fornecido" });
         }
 
+        // faz a desestruturação do token e verifica se o token é válido
         const decoded = jwt.verify(token, process.env.SECRET_JWT)
         request.payload = decoded; 
-        console.log(decoded)
-        try {
+
+        try { 
             const roles = await PermissionRole.findAll({
                 where: {
                     roleId: request.payload.roles.map((role)=>role.id)
@@ -29,8 +28,6 @@ function hasPermission(permissions){
                 attributes: ['permissionId'],
                 include: [{ model: Permission, as: 'permissions'}]
             })
-
-            //console.log(roles[0].permissions)
 
             //  some => Se pelo menos 1 for True, retorna True
             const existPermission = roles.some((item) => {

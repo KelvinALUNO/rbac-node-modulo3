@@ -9,7 +9,7 @@ const PermissionRole = require("../../models/PermissionRole")
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable(User.tableName, User.tableAttributes);
+    //await queryInterface.createTable(User.tableName, User.tableAttributes);
     await queryInterface.createTable(Role.tableName, Role.tableAttributes);
     await queryInterface.createTable(Permission.tableName, Permission.tableAttributes);
     await queryInterface.createTable(UserRole.tableName, UserRole.tableAttributes);

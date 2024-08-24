@@ -1,45 +1,45 @@
-const { compare, hash } = require("bcryptjs")
-const Aluno = require("../models/Aluno")
-const { sign } = require('jsonwebtoken')
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const Role= require('../models/Role');
+const Permission = require('../models/Permission');
 
 class LoginController {
 
     async login(req, res) {
         try {
-            const email = req.body.email
-            const password = req.body.password
+            const { email, password } = req.body;
 
-            if (!email) {
-                return res.status(400).json({ message: 'O email é obrigatório' })
+            if (!email || !password) {
+                return res.status(400).send('Email e senha são obrigatórios');
             }
 
-            if (!password) {
-                return res.status(400).json({ message: 'O password é obrigatório' })
-            }
 
-            const aluno = await Aluno.findOne({
-                where: { email: email }
+            const usuario = await User.findOne({
+                where: { email: email },
+                include: [{
+                    model: Role, as: 'roles', through: { attributes: [] },
+                    include: [{ model: Permission, as: 'permissions', through: { attributes: [] } }]
+                }],
             })
 
-            if (!aluno) {
-                return res.status(404).json({ error: 'Nenhum aluno corresponde a email e senha fornecidos!' })
-            }
-             
-            const hashSenha = await compare(password, aluno.password)
-
-            if(hashSenha === false) {
-                return res.status(400).json({mensagem: 'Não encontrado essa conta'})
+            if (!usuario) {
+                return res.status(404).send('Usuário não encontrado');
             }
 
-            const payload = { sub: aluno.id, email: aluno.email, nome: aluno.nome }
+            const senhaCorreta = await bcrypt.compare(password, usuario.password);
 
-            const token = sign(payload, process.env.SECRET_JWT)
+            if (!senhaCorreta) {
+                return res.status(401).send('Senha incorreta');
+            }
 
-            res.status(200).json({ Token: token })
+            const payload = { id: usuario.id, email: usuario.email, roles: usuario.roles };
+            const token = jwt.sign(payload, process.env.SECRET_JWT, { expiresIn: '1h' });
+            res.status(200).json({ token });
 
-        } catch (error) {
-            console.log(error)
-            return res.status(500).json({ error: error, message: 'Algo deu errado!' })
+        } catch (err) {
+            console.error(err);
+            res.status(500).send('Erro no servidor');
         }
     }
 }
